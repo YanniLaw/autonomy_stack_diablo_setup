@@ -73,8 +73,8 @@ tare_planner_node:
     viewpoint_manager/number_x : 50
     viewpoint_manager/number_y : 50
     viewpoint_manager/number_z : 1
-    viewpoint_manager/resolution_x : 0.4
-    viewpoint_manager/resolution_y : 0.4
+    viewpoint_manager/resolution_x : 0.2
+    viewpoint_manager/resolution_y : 0.2
     viewpoint_manager/resolution_z : 0.0
     kConnectivityHeightDiffThr : 0.25
     kGreedyViewPointSampleRange : 3

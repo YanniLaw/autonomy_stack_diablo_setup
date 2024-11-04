@@ -24,7 +24,7 @@
     <param name="checkObstacle" value="true" />
     <param name="checkRotObstacle" value="false" />
     <param name="adjacentRange" value="3.5" />
-    <param name="obstacleHeightThre" value="0.15" />
+    <param name="obstacleHeightThre" value="0.02" />
     <param name="groundHeightThre" value="0.05" />
     <param name="costHeightThre1" value="0.1" />
     <param name="costHeightThre2" value="0.05" />

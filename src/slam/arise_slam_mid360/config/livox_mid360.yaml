@@ -71,7 +71,7 @@ laser_mapping_node:
         pos_degeneracy_threshold: 1.0
         ori_degeneracy_threshold: 1.0
 
-        local_mode: false
+        local_mode: true # false: slam mode, true: pure location mode
         read_pose_file: false
         init_x: 0.0
         init_y: 0.0

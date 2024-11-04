@@ -132,7 +132,7 @@ def generate_launch_description():
   ld.add_action(start_visualization_tools)
   ld.add_action(start_joy)
   ld.add_action(start_tare_planner)
-  ld.add_action(start_theta)
+  # ld.add_action(start_theta)
   ld.add_action(start_mid360)
   ld.add_action(start_diablo_ctrl)
 
