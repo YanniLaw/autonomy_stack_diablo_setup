@@ -1584,11 +1584,11 @@ namespace arise_slam {
      
         
         std::size_t curLidarBufferSize = lidarBuf.getSize();
-       
-        if(curLidarBufferSize > 2) {
-            RCLCPP_WARN(this->get_logger(), "Large lidar buffer size: %zu", curLidarBufferSize);
-            RCLCPP_WARN(this->get_logger(), "  IMU and lidar times are likely out of sync");
-        }
+        // block the print
+        // if(curLidarBufferSize > 2) {
+        //     RCLCPP_WARN(this->get_logger(), "Large lidar buffer size: %zu", curLidarBufferSize);
+        //     RCLCPP_WARN(this->get_logger(), "  IMU and lidar times are likely out of sync");
+        // }
         
         
         while (curLidarBufferSize >= 50)

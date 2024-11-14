@@ -28,6 +28,7 @@ void FARMaster::Init() {
   terrain_sub_        = nh_->create_subscription<sensor_msgs::msg::PointCloud2>("/terrain_cloud", 1, std::bind(&FARMaster::TerrainCallBack, this, std::placeholders::_1));
   scan_sub_           = nh_->create_subscription<sensor_msgs::msg::PointCloud2>("/scan_cloud", 5, std::bind(&FARMaster::ScanCallBack, this, std::placeholders::_1));
   waypoint_sub_       = nh_->create_subscription<geometry_msgs::msg::PointStamped>("/goal_point", 1, std::bind(&FARMaster::WaypointCallBack, this, std::placeholders::_1));
+  rviz_goal_pose_sub_ = nh_->create_subscription<geometry_msgs::msg::PoseStamped>("/goal_pose", 1, std::bind(&FARMaster::GoalPoseCallBack, this, std::placeholders::_1));
   terrain_local_sub_  = nh_->create_subscription<sensor_msgs::msg::PointCloud2>("/terrain_local_cloud", 1, std::bind(&FARMaster::TerrainLocalCallBack, this, std::placeholders::_1));
   joy_command_sub_    = nh_->create_subscription<sensor_msgs::msg::Joy>("/joy", 5, std::bind(&FARMaster::JoyCommandCallBack, this, std::placeholders::_1));
   update_command_sub_ = nh_->create_subscription<std_msgs::msg::Bool>("/update_visibility_graph", 5, std::bind(&FARMaster::UpdateCommandCallBack, this, std::placeholders::_1));
@@ -802,11 +803,33 @@ void FARMaster::ExtractDynamicObsFromScan(const PointCloudPtr& scanCloudIn,
 }
 
 void FARMaster::WaypointCallBack(const geometry_msgs::msg::PointStamped& route_goal) {
+  RCLCPP_INFO(nh_->get_logger(), "------WaypointCallBack------");
   if (!is_graph_init_) {
     if (FARUtil::IsDebug) RCLCPP_WARN(nh_->get_logger(),"FARMaster: wait for v-graph to init before sending any goals");
     return;
   }
+  RCLCPP_INFO(nh_->get_logger(), "Receive Customized Goal (%f, %f, %f)",route_goal.point.x, route_goal.point.y, route_goal.point.z);
   Point3D goal_p(route_goal.point.x, route_goal.point.y, route_goal.point.z);
+  const std::string goal_frame = route_goal.header.frame_id;
+  if (!FARUtil::IsSameFrameID(goal_frame, master_params_.world_frame)) {
+    if (FARUtil::IsDebug) RCLCPP_WARN_ONCE(nh_->get_logger(), "FARMaster: waypoint published is not on world frame!");
+    FARUtil::TransformPoint3DFrame(goal_frame, master_params_.world_frame, tf_buffer_, goal_p); 
+  }
+  graph_planner_.UpdateGoal(goal_p);
+  FARUtil::Timer.start_time("Overall_executing", true);
+  // visualize original goal
+  planner_viz_.VizPoint3D(goal_p, "original_goal", VizColor::RED, 1.5);
+}
+
+void FARMaster::GoalPoseCallBack(const geometry_msgs::msg::PoseStamped& route_goal) {
+  RCLCPP_INFO(nh_->get_logger(), "------GoalPoseCallBack------");
+  if (!is_graph_init_) {
+    if (FARUtil::IsDebug) RCLCPP_WARN(nh_->get_logger(),"FARMaster: wait for v-graph to init before sending any goals");
+    return;
+  }
+  RCLCPP_INFO(nh_->get_logger(), "Receive Rviz Goal (%f, %f, %f)",route_goal.pose.position.x,
+     route_goal.pose.position.y, route_goal.pose.position.z);
+  Point3D goal_p(route_goal.pose.position.x, route_goal.pose.position.y, route_goal.pose.position.z);
   const std::string goal_frame = route_goal.header.frame_id;
   if (!FARUtil::IsSameFrameID(goal_frame, master_params_.world_frame)) {
     if (FARUtil::IsDebug) RCLCPP_WARN_ONCE(nh_->get_logger(), "FARMaster: waypoint published is not on world frame!");
