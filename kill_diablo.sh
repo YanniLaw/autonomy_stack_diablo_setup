@@ -1,0 +1,1 @@
+killall -9 livox_ros_driver2_node feature_extraction_node laser_mapping_node imu_preintegration_node terrainAnalysis terrainAnalysisExt localPlanner visualizationTools diablo_ctrl_node visualizationTools joy_node sensorScanGeneration pathFollower static_transform_publisher far_planner

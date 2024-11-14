@@ -1110,7 +1110,11 @@ namespace arise_slam {
 
                 DepthFeatureExtraction.uniformfeatureExtraction(lidar_msg, plannerPoints, config_.skip_realsense_points,config_.min_range);
               
-                assert (plannerPoints->size()>0);     
+                // assert (plannerPoints->size()>0);
+                if (plannerPoints->size() <= 0) {
+                    RCLCPP_WARN(this->get_logger(),"Get planner points <= 0 !!!!!!");
+                    return;
+                }  
                 publishTopic(lidar_start_time, lidar_msg, edgePoints, plannerPoints, bobPoints, q_w_original_l);   
 
             }else
@@ -1178,7 +1182,11 @@ namespace arise_slam {
 
     void featureExtraction::imu_Handler(const sensor_msgs::msg::Imu::SharedPtr msg_in)
     {   
-       
+        static bool get_imu_data = false;
+        if (!get_imu_data) {
+            get_imu_data = true;
+            RCLCPP_WARN(this->get_logger(),"Get first imu data, timestame is %f", msg_in->header.stamp.sec + msg_in->header.stamp.nanosec * 1e-9);
+        }
         m_buf.lock();
         auto msg = msg_in;
         double timestamp = msg->header.stamp.sec + msg->header.stamp.nanosec * 1e-9;
@@ -1291,8 +1299,11 @@ namespace arise_slam {
                         //TODO: IMUInit might be not necessary since it is only for accleration 
                         imu_Init->imuInit(imuBuf);
                         IMU_INIT=true;
-                        imuBuf.clean(timestamp);
-                        std::cout<<"IMU Initialization Process Finish! "<<std::endl;
+                        imuBuf.clean(timestamp); 
+                        std::cout << std::fixed << std::setprecision(10);
+                        std::cout << "lidar first time: " << lidar_first_time << ",imu timestamp: " << timestamp << std::endl;
+                        // imuBuf.clean(lidar_first_time - 0.1);
+                        std::cout << "\033[32m" << "IMU Initialization Process Finish!" <<  "\033[0m" <<std::endl;
 
                     }
                     if(IMU_INIT==true)
@@ -1502,7 +1513,7 @@ namespace arise_slam {
     //TODO: add livox mid360 handler
     void featureExtraction::livoxHandler(const livox_ros_driver2::msg::CustomMsg::UniquePtr msg)
     {     
-
+        static bool get_lidar_data = false;
         if (imuBuf.empty())
         {   
             RCLCPP_WARN(this->get_logger(), "imu buf empty");
@@ -1512,7 +1523,10 @@ namespace arise_slam {
         frameCount = frameCount + 1;
         if (frameCount % config_.skipFrame != 0)
             return; 
-
+        if (!get_lidar_data) {
+            get_lidar_data = true;
+            RCLCPP_WARN(this->get_logger(),"Get first lidar frame, timestamp: %f", msg->header.stamp.sec + msg->header.stamp.nanosec*1e-9);
+        }
         m_buf.lock();
         
         pcl::PointCloud<point_os::PointcloudXYZITR>::Ptr pointCloud(
