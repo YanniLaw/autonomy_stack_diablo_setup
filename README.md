@@ -426,7 +426,7 @@ Users can set up AI models on the base station computer to process the transmitt
 
 ## Main Contributors
 
-[Guofei Chen](https://gfchen01.cc), [Botao He](https://github.com/Bottle101), [Shibo Zhao](https://shibowing.github.io), [Chao Cao](https://caochao.me), [Sam Shum](https://github.com/supercrazysam), and [Ji Zhang](https://frc.ri.cmu.edu/~zhangji)
+[Shibo Zhao](https://shibowing.github.io), [Guofei Chen](https://gfchen01.cc), [Botao He](https://github.com/Bottle101), [Chao Cao](https://caochao.me), [Sam Shum](https://github.com/supercrazysam), and [Ji Zhang](https://frc.ri.cmu.edu/~zhangji)
 
 ## Credits
 
@@ -435,6 +435,8 @@ The project is sponsored by the [National Robotics Engineering Center](https://w
 [gtsam](https://gtsam.org), [Sophus](http://github.com/strasdat/Sophus.git), [domain_bridge](https://github.com/ros2/domain_bridge), [livox_ros_driver2](https://github.com/Livox-SDK/livox_ros_driver2), [Livox-SDK2](https://github.com/Livox-SDK/Livox-SDK2), [libuvc-theta](https://github.com/ricohapi/libuvc-theta), [gstthetauvc](https://github.com/nickel110/gstthetauvc), [diablo_ros2](https://github.com/DDTRobot/diablo_ros2), and [ROS-TCP-Endpoint](https://github.com/Unity-Technologies/ROS-TCP-Endpoint) packages are from open-source releases.
 
 ## Relevant Links
+
+The SLAM module is based on [Arise SLAM](https://github.com/shibowing/Arise_Slam) (upgraded LOAM implementation).
 
 The base autonomy system is based on [Autonomous Exploration Development Environment](https://www.cmu-exploration.com).
 
