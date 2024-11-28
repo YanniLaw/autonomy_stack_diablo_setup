@@ -13,7 +13,7 @@
 
   <maintainer email="guofeic@andrew.cmu.edu">Guofei Chen</maintainer>
 
-  <license>Apache</license>
+  <license>BSD</license>
  
   <buildtool_depend>amend_cmake</buildtool_depend>
 
