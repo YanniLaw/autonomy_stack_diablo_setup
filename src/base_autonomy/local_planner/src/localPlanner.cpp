@@ -915,6 +915,7 @@ int main(int argc, char** argv)
         else slow.data = 0;
         pubSlowDown->publish(slow);
 
+        static const float start_path_orientation_array[7] = {-27.0, -18.0, -9.0, 0.0, 9.0, 18.0, 27.0};
         if (selectedGroupID >= 0) {
           int rotDir = int(selectedGroupID / groupNum);
           float rotAng = (10.0 * rotDir - 180.0) * PI / 180;
@@ -937,7 +938,56 @@ int main(int argc, char** argv)
               break;
             }
           }
+#if 0
+          // cal selected start path orientation wrt vehicle
+          float selected_group_orientation = start_path_orientation_array[selectedGroupID];
+          float selected_path_orientation = selected_group_orientation + rotAng * 180.0 / M_PI;
+          if (selected_path_orientation > 180.0) selected_path_orientation -= 360.0;
+          if (selected_path_orientation < -180.0) selected_path_orientation += 360.0;
+          RCLCPP_INFO(nh->get_logger(), "selectedGroupID %d, selected_group_orientation: %f, rotAng: %f, selected_path_orientation: %f",
+                      selectedGroupID, selected_group_orientation,rotAng * 180.0 / M_PI,selected_path_orientation);
+          
+          static float last_selected_path_orientation = selected_path_orientation;
+          // check min angle diff with last pub path
+          double angle_diff = (selected_path_orientation - last_selected_path_orientation) * M_PI / 180.0;
+          const float norm_angle_diff = fmod(angle_diff + M_PI, 2.0 * M_PI);
+          float shortest_angle_diff = 0.0;
+          if (norm_angle_diff <= 0.0)
+            shortest_angle_diff = norm_angle_diff + M_PI;
+          else
+            shortest_angle_diff = norm_angle_diff - M_PI;
+          RCLCPP_INFO(nh->get_logger(), "shortest_angle_diff: %f",shortest_angle_diff * 180.0 / M_PI);
+          // static bool use_momentum = false;
+          static int direction_change_count = 0;
+          // static int direction_no_change_count = 0;
+          static bool pub_path = true;
+          if (fabs(shortest_angle_diff * 180.0 / M_PI) > 95.0) {
+            direction_change_count++;
+            // direction_no_change_count = 0;
+            pub_path = false;
+            if (direction_change_count > 2) {
+              last_selected_path_orientation = selected_path_orientation;      
+              // use_momentum = true;
+              pub_path = true;
+            }
+          } else {
+            // direction_no_change_count++;
+            direction_change_count = 0;
+            last_selected_path_orientation = selected_path_orientation;
+            pub_path = true;
+            // if (direction_no_change_count > 2) {
+            //   direction_change_count = 0;
+            //   use_momentum = false;
+            // }
 
+          }
+
+          if (pub_path) {
+            path.header.stamp = rclcpp::Time(static_cast<uint64_t>(odomTime * 1e9));
+            path.header.frame_id = "vehicle";
+            pubPath->publish(path);
+          }
+#endif           
           path.header.stamp = rclcpp::Time(static_cast<uint64_t>(odomTime * 1e9));
           path.header.frame_id = "vehicle";
           pubPath->publish(path);
