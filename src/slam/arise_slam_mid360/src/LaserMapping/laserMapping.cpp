@@ -63,6 +63,11 @@ namespace arise_slam {
             "vins_estimator/imu_propagate", 100,
             std::bind(&laserMapping::visualOdometryHandler, this,
                         std::placeholders::_1), sub_options);
+        
+        subStopMapping = this->create_subscription<std_msgs::msg::Bool>(
+            "/stop_mapping", 10,
+            std::bind(&laserMapping::StopMappingHandler, this, 
+                      std::placeholders::_1), sub_options);
 
 
         pubLaserCloudSurround = this->create_publisher<sensor_msgs::msg::PointCloud2>(
@@ -114,6 +119,16 @@ namespace arise_slam {
             std::chrono::milliseconds(static_cast<int>(100.)),
             std::bind(&laserMapping::process, this));
 
+        // check if there exist map file
+        std::filesystem::path path_obj(config_.map_dir);
+        if (std::filesystem::exists(path_obj)) { //  && path_obj.extension() == ".pcd"
+            slam.local_mode = 1;
+            RCLCPP_INFO(this->get_logger(), "Map file exist! enter pure localization mode!");
+        } else {
+            slam.local_mode = 0;
+            RCLCPP_INFO(this->get_logger(), "Map file not exist! enter slam mode!");
+        }
+
         slam.initROSInterface(shared_from_this());
         slam.localMap.lineRes_ = config_.lineRes;
         slam.localMap.planeRes_ = config_.planeRes;
@@ -127,7 +142,7 @@ namespace arise_slam {
         slam.OptSet.max_surface_features=config_.max_surface_features;
         slam.OptSet.yaw_ratio=yaw_ratio;
         slam.map_dir=config_.map_dir;
-        slam.local_mode=config_.local_mode;
+        // slam.local_mode=config_.local_mode;
         slam.init_x=config_.init_x;
         slam.init_y=config_.init_y;
         slam.init_z=config_.init_z;
@@ -165,6 +180,8 @@ namespace arise_slam {
         laserCloudRealsense.reset(new pcl::PointCloud<PointType>());
         laserCloudPriorOrg.reset(new pcl::PointCloud<PointType>());
         laserCloudPrior.reset(new pcl::PointCloud<PointType>());
+        saved_map_.reset(new pcl::PointCloud<PointType>());
+        map_filter_.setLeafSize(0.1, 0.1, 0.1);
 
         Eigen::Quaterniond q_wmap_wodom_(1, 0, 0, 0);
         Eigen::Vector3d t_wmap_wodom_(0, 0, 0);
@@ -268,6 +285,8 @@ namespace arise_slam {
     
     bool laserMapping::readPointCloud()
     {
+        RCLCPP_INFO_STREAM(this->get_logger(), "Load map: " << slam.map_dir);
+#if 0        
         FILE *map_file = fopen(slam.map_dir.c_str(), "r");
         if (map_file == NULL) {
             return false;
@@ -287,6 +306,15 @@ namespace arise_slam {
         
             laserCloudPriorOrg->push_back(pointRead);
         }
+#else
+        // pcl::PointCloud pointcloud_map;
+        if (pcl::io::loadPCDFile<PointType>(slam.map_dir, *laserCloudPriorOrg) == -1) {
+            RCLCPP_ERROR_STREAM(this->get_logger(), "Load pcd map failed.");
+        } else {
+            RCLCPP_INFO_STREAM(this->get_logger(), "Load pcd map success, size:" << laserCloudPriorOrg->height * laserCloudPriorOrg->width);
+        }
+        // laserCloudPriorOrg = std::make_shared<PointCloud>(pointcloud_map);
+#endif
         
         downSizeFilterSurf.setInputCloud(laserCloudPriorOrg);
         downSizeFilterSurf.filter(*laserCloudPrior);
@@ -449,6 +477,29 @@ namespace arise_slam {
        mBuf.lock();
        visual_odom_buf.addMeas(visualOdometry, secs(visualOdometry));
        mBuf.unlock();
+    }
+
+    void laserMapping::StopMappingHandler(const std_msgs::msg::Bool::SharedPtr stop_mapping) {
+        mBuf.lock();
+        if (stop_mapping->data) {
+            RCLCPP_INFO(this->get_logger(), "Received stop mapping command!");
+            // save map 
+            saved_map_->width = saved_map_->points.size();
+            saved_map_->height = 1;
+            // check if there exist map file
+            std::filesystem::path path_obj(config_.map_dir);
+            if (std::filesystem::exists(path_obj)) {
+                RCLCPP_INFO(this->get_logger(), "Map file exist! Remove file!!!");
+                if (std::filesystem::remove(path_obj)) {
+                    RCLCPP_WARN_STREAM(this->get_logger(), "Map file: " << config_.map_dir << " has been deleted.");
+                } else {
+                    RCLCPP_WARN_STREAM(this->get_logger(), "Failed to delete map file: " << config_.map_dir);
+                }
+            }
+            pcl::io::savePCDFileBinary(slam.map_dir, *saved_map_);
+            RCLCPP_INFO_STREAM(this->get_logger(), "Save map success in " << slam.map_dir);
+        }
+        mBuf.unlock();
     }
 
     void laserMapping::setInitialGuess()
@@ -874,6 +925,15 @@ namespace arise_slam {
         laserCloudFullRes3.header.stamp = rclcpp::Time(timeLaserOdometry*1e9);
         laserCloudFullRes3.header.frame_id = WORLD_FRAME;
         pubLaserCloudFullRes->publish(laserCloudFullRes3);
+
+        // write to the map pointcloud
+        if (!slam.local_mode) {
+            pcl::PointCloud<pcl::PointXYZI>::Ptr temp_cloud(new pcl::PointCloud<pcl::PointXYZI>());
+            *saved_map_ += *laserCloudFullRes;
+            map_filter_.setInputCloud(saved_map_);
+            map_filter_.filter(*temp_cloud);
+            saved_map_ = temp_cloud;
+        }
 
         laserCloudFullRes_rot->clear();
         laserCloudFullRes_rot->resize(laserCloudFullResNum);

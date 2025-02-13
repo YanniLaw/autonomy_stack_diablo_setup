@@ -71,7 +71,7 @@ def generate_launch_description():
         },
         parameters=[LaunchConfiguration("config_file"),
             { "calibration_file": LaunchConfiguration("calibration_file"),
-             "map_dir": os.path.join(home_directory, "Desktop/pointcloud_local.txt"),
+             "map_dir": os.path.join(home_directory, "pointcloud.pcd"),
         }],
         remappings=[
             ("laser_odom_to_init", LaunchConfiguration("odom_topic")),

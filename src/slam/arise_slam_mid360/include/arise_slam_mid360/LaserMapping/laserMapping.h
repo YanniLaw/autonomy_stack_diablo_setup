@@ -7,6 +7,8 @@
 
 #include <cmath>
 #include <iostream>
+#include <filesystem>
+#include <fstream>
 #include <queue>
 #include <string>
 #include <vector>
@@ -18,6 +20,7 @@
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/filters/crop_box.h>
 #include <pcl/kdtree/kdtree_flann.h>
+#include <pcl/io/pcd_io.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
@@ -25,6 +28,7 @@
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <nav_msgs/msg/odometry.hpp>
 #include <nav_msgs/msg/path.hpp>
+#include <std_msgs/msg/bool.hpp>
 #include "rclcpp/rclcpp.hpp"
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <tf2_ros/transform_broadcaster.h>
@@ -133,6 +137,9 @@ namespace arise_slam {
         void
         visualOdometryHandler(const nav_msgs::msg::Odometry::SharedPtr visualOdometry);
 
+        void
+        StopMappingHandler(const std_msgs::msg::Bool::SharedPtr stop_mapping);
+        
         // void 
         // takeoffAlignmentHandler(const takeoff_manager::TakeoffAlignmentConstPtr &msg);
 
@@ -207,6 +214,7 @@ namespace arise_slam {
         rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr subLaserCloudFullRes;
         rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr subLaserRawdata;
         rclcpp::Subscription<arise_slam_mid360_msgs::msg::LaserFeature>::SharedPtr subLaserFeatureInfo;
+        rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr subStopMapping;
         // rclcpp::Subscription<>::SharedPtr subTakeoffAlignment;
 
         // Publisher
@@ -303,6 +311,10 @@ namespace arise_slam {
 
         pcl::PointCloud<PointType>::Ptr laserCloudPriorOrg;
         pcl::PointCloud<PointType>::Ptr laserCloudPrior;
+        // for map saving
+        pcl::PointCloud<PointType>::Ptr saved_map_;
+        pcl::VoxelGrid<PointType> map_filter_;
+
         sensor_msgs::msg::PointCloud2 priorCloudMsg;
 
         Transformd T_w_lidar;
