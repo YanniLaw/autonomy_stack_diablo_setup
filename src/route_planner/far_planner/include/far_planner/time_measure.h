@@ -35,7 +35,7 @@ public:
             const auto end_time = Clock::now();
             const auto duration = duration_cast<microseconds>(end_time - it->second);
             const double time_duration = duration.count() / 1000.0;
-            if (is_output) std::cout<<"    "<<timer_name<<" "<<"Time: "<<time_duration<<"ms"<<std::endl;
+            // if (is_output) std::cout<<"    "<<timer_name<<" "<<"Time: "<<time_duration<<"ms"<<std::endl;
             timer_stack_.erase(it);
             return time_duration;
         } 

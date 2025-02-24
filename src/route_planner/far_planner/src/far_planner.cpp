@@ -194,7 +194,7 @@ void FARMaster::MainLoopCallBack() {
   contour_graph_.UpdateContourGraph(odom_node_ptr_, realworld_contour_);
   if (is_graph_init_) {
     if (!FARUtil::IsDebug) printf("\033[2K");
-    std::cout<<"    "<<"Local V-Graph Updated. Number of local vertices: "<<ContourGraph::contour_graph_.size()<<std::endl;
+    // std::cout<<"    "<<"Local V-Graph Updated. Number of local vertices: "<<ContourGraph::contour_graph_.size()<<std::endl;
   }
   /* Adjust heights with terrain */
   map_handler_.AdjustCTNodeHeight(ContourGraph::contour_graph_);
@@ -216,7 +216,7 @@ void FARMaster::MainLoopCallBack() {
   }
   if (is_graph_init_) {
     if (!FARUtil::IsDebug) printf("\033[2K");
-    std::cout<<"    "<< "Number of new vertices adding to global V-Graph: "<< new_nodes_.size()<<std::endl;
+    // std::cout<<"    "<< "Number of new vertices adding to global V-Graph: "<< new_nodes_.size()<<std::endl;
   }
   /* Graph Updating */
   graph_manager_.UpdateNavGraph(new_nodes_, is_stop_update_, clear_nodes_);
@@ -229,7 +229,7 @@ void FARMaster::MainLoopCallBack() {
   nav_graph_ = graph_manager_.GetNavGraph();
   if (is_graph_init_) {
     if (!FARUtil::IsDebug) printf("\033[2K");
-    std::cout<<"    "<<"Global V-Graph Updated. Number of global vertices: "<<nav_graph_.size()<<std::endl;
+    // std::cout<<"    "<<"Global V-Graph Updated. Number of global vertices: "<<nav_graph_.size()<<std::endl;
   }
   contour_graph_.ExtractGlobalContours();      // Global Polygon Update
   graph_planner_.UpdaetVGraph(nav_graph_);     // Graph Planner Update
@@ -255,7 +255,7 @@ void FARMaster::MainLoopCallBack() {
 
   if (is_graph_init_) { 
     if (FARUtil::IsDebug) {
-      std::cout<<" ========================================================== "<<std::endl;
+      // std::cout<<" ========================================================== "<<std::endl;
     } else { // cleanup outputs in terminal
       for (int i = 0; i < 6; i++) {
         printf("\033[A");
@@ -277,10 +277,10 @@ void FARMaster::PlanningCallBack() {
   if (goal_ptr == NULL) {
     /* Graph Traversablity Update */
     if (!FARUtil::IsDebug) printf("\033[2K");
-    std::cout<<"    "<<"Adding Goal to V-Graph "<<"Time: "<<0.f<<"ms"<<std::endl;
+    // std::cout<<"    "<<"Adding Goal to V-Graph "<<"Time: "<<0.f<<"ms"<<std::endl;
     graph_planner_.UpdateGraphTraverability(odom_node_ptr_, NULL);
     if (!FARUtil::IsDebug) printf("\033[2K");
-    std::cout<<"    "<<"Path Search "<<"Time: "<<0.f<<"ms"<<std::endl;
+    // std::cout<<"    "<<"Path Search "<<"Time: "<<0.f<<"ms"<<std::endl;
   } else { 
     // Update goal postion with nearby terrain cloud
     const Point3D ori_p = graph_planner_.GetOriginNodePos(true);
