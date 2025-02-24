@@ -192,6 +192,8 @@ namespace arise_slam {
             return msg->header.stamp.sec + msg->header.stamp.nanosec*1e-9;
         }
 
+        bool canSaveFrame();
+
     private:
         static constexpr float vision_laser_time_offset = 0.0;
         static constexpr int laserCloudCenWidth = 10;

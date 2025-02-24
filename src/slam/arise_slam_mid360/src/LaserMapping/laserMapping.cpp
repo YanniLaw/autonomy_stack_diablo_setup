@@ -5,10 +5,12 @@
 
 #include "arise_slam_mid360/LaserMapping/laserMapping.h"
 
-double parameters[7] = {0, 0, 0, 0, 0, 0, 1};
-Eigen::Map<Eigen::Vector3d> t_w_curr(parameters);
-Eigen::Map<Eigen::Quaterniond> q_w_curr(parameters+3);
+// double parameters[7] = {0, 0, 0, 0, 0, 0, 1};
+// Eigen::Map<Eigen::Vector3d> t_w_curr(parameters);
+// Eigen::Map<Eigen::Quaterniond> q_w_curr(parameters+3);
 
+Eigen::Vector3d t_w_curr(0,0,0);
+Eigen::Quaterniond q_w_curr(1,0,0,0);
 namespace arise_slam {
 
     laserMapping::laserMapping(const rclcpp::NodeOptions & options)
@@ -866,6 +868,26 @@ namespace arise_slam {
         return true;
     }
 
+    bool laserMapping::canSaveFrame() {
+        static Eigen::Quaternion last_quat = q_w_curr;
+        static Eigen::Vector3d last_pos = t_w_curr;
+        static bool first_frame = false;
+        if (!first_frame) {
+            first_frame = true;
+            return true;
+        }
+        if ((t_w_curr - last_pos).norm() >= 0.1 || 
+             std::abs(ShortestAngularDistance(
+                GetYawFromQuaternion(last_quat), GetYawFromQuaternion(q_w_curr))) >= 0.0873) {
+            RCLCPP_INFO(this->get_logger(), "canSaveFrame...");
+            last_quat = q_w_curr;
+            last_pos = t_w_curr;
+            return true;
+        }
+
+        return false;
+    }
+
     void laserMapping::publishTopic(){
 
         TicToc t_pub;
@@ -927,7 +949,7 @@ namespace arise_slam {
         pubLaserCloudFullRes->publish(laserCloudFullRes3);
 
         // write to the map pointcloud
-        if (!slam.local_mode) {
+        if (!slam.local_mode && canSaveFrame()) {
             pcl::PointCloud<pcl::PointXYZI>::Ptr temp_cloud(new pcl::PointCloud<pcl::PointXYZI>());
             *saved_map_ += *laserCloudFullRes;
             map_filter_.setInputCloud(saved_map_);

@@ -37,6 +37,8 @@
 #pragma once
 
 #include <cmath>
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 
 #include <pcl/point_types.h>
 #include <sensor_msgs/msg/point_cloud2.hpp>
@@ -54,4 +56,38 @@ inline double deg2rad(double degrees)
   return degrees * M_PI / 180.0;
 }
 
+inline double GetYawFromQuaternion(const Eigen::Quaterniond& q) {
+  Eigen::Vector3d forward = q * Eigen::Vector3d::UnitX();
+  return std::atan2(forward.y(), forward.x());  
+}
 
+/*!
+  * \brief normalize
+  *
+  * Normalizes the angle to be -M_PI circle to +M_PI circle
+  * It takes and returns radians.
+  *
+  */
+inline double NormalizeAngle(double angle)
+{
+  const double result = fmod(angle + M_PI, 2.0*M_PI);
+  if(result <= 0.0) return result + M_PI;
+  return result - M_PI;
+}
+
+
+/*!
+  * \function
+  * \brief shortest_angular_distance
+  *
+  * Given 2 angles, this returns the shortest angular
+  * difference.  The inputs and ouputs are of course radians.
+  *
+  * The result
+  * would always be -pi <= result <= pi.  Adding the result
+  * to "from" will always get you an equivelent angle to "to".
+  */
+inline double ShortestAngularDistance(double from, double to)
+{
+  return NormalizeAngle(to-from);
+}
