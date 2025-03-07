@@ -20,7 +20,7 @@
     <param name="minDyObsPointNum" value="1" />
     <param name="noDataObstacle" value="false" />
     <param name="noDataBlockSkipNum" value="0" />
-    <param name="minBlockPointNum" value="10" />
+    <param name="minBlockPointNum" value="6" />
     <param name="vehicleHeight" value="1.5" />
     <param name="voxelPointUpdateThre" value="100" />
     <param name="voxelTimeUpdateThre" value="2.0" />

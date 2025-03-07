@@ -395,7 +395,7 @@ int main(int argc, char **argv) {
                 point.z - vehicleZ < maxRelZ + disRatioZ * dis &&
                 (laserCloudTime - systemInitTime - point.intensity <
                      decayTime ||
-                 dis < noDecayDis) &&
+                 dis < noDecayDis) && dis >= minDyObsDis &&
                 !(dis < clearingDis && clearingCloud)) {
               terrainVoxelCloudPtr->push_back(point);
             }
@@ -518,7 +518,7 @@ int main(int argc, char **argv) {
 
             float dis1 = sqrt(pointX1 * pointX1 + pointY1 * pointY1);
             float angle1 = atan2(pointZ1 - minDyObsRelZ, dis1) * 180.0 / PI;
-            if (angle1 > minDyObsAngle) {
+            if (angle1 > minDyObsAngle && dis1 > minDyObsDis) {
               planarVoxelDyObs[planarVoxelWidth * indX + indY] = 0;
             }
           }

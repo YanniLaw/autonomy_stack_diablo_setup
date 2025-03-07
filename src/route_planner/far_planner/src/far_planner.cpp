@@ -55,6 +55,8 @@ void FARMaster::Init() {
   new_PCL_pub_         = nh_->create_publisher<sensor_msgs::msg::PointCloud2>("/FAR_new_debug",1);
   terrain_height_pub_  = nh_->create_publisher<sensor_msgs::msg::PointCloud2>("/FAR_terrain_height_debug",1);
 
+  joy_command_pub_  = nh_->create_publisher<sensor_msgs::msg::Joy>("/joy",1);
+
   //print publisher and subscriber init complete
   // RCLCPP_INFO(nh_->get_logger(), "FAR Planner Subscriber and Publisher Initiated");
 
@@ -141,6 +143,35 @@ void FARMaster::Init() {
   RCLCPP_INFO(nh_->get_logger(), "FAR Planner Initiated Complete");
 }
 
+void FARMaster::PubJoyCommandForNav() {
+  sensor_msgs::msg::Joy joy;
+
+  joy.axes.push_back(0);
+  joy.axes.push_back(0);
+  joy.axes.push_back(-1.0);
+  joy.axes.push_back(0);
+  joy.axes.push_back(1.0);
+  joy.axes.push_back(1.0);
+  joy.axes.push_back(0);
+  joy.axes.push_back(0);
+
+  joy.buttons.push_back(0);
+  joy.buttons.push_back(0);
+  joy.buttons.push_back(0);
+  joy.buttons.push_back(0);
+  joy.buttons.push_back(0);
+  joy.buttons.push_back(0);
+  joy.buttons.push_back(0);
+  joy.buttons.push_back(1);
+  joy.buttons.push_back(0);
+  joy.buttons.push_back(0);
+  joy.buttons.push_back(0);
+
+  joy.header.stamp = nh_->get_clock()->now();
+  joy.header.frame_id = "planner_tool";
+  joy_command_pub_->publish(joy);
+}
+
 void FARMaster::ResetEnvironmentAndGraph() {
   this->ResetInternalValues();
   if (!FARUtil::IsDebug) { // Terminal Output
@@ -162,6 +193,7 @@ void FARMaster::ResetEnvironmentAndGraph() {
   goal_waypoint_stamped_.header.stamp = nh_->now();
   goal_waypoint_stamped_.point = FARUtil::Point3DToGeoMsgPoint(robot_pos_);
   goal_pub_->publish(goal_waypoint_stamped_);
+  PubJoyCommandForNav();
   NodePtrStack empty_path;
   planner_viz_.VizPath(empty_path);
 }
@@ -319,6 +351,7 @@ void FARMaster::PlanningCallBack() {
       }
       goal_waypoint_stamped_.point = FARUtil::Point3DToGeoMsgPoint(waypoint);
       goal_pub_->publish(goal_waypoint_stamped_);
+      PubJoyCommandForNav();
       is_planner_running_ = true;
       planner_viz_.VizPoint3D(waypoint, "waypoint", VizColor::MAGNA, 1.5);
       planner_viz_.VizPoint3D(current_free_goal, "free_goal", VizColor::GREEN, 1.5);
@@ -331,6 +364,7 @@ void FARMaster::PlanningCallBack() {
       if (is_planning_fails) { // stops the robot
         goal_waypoint_stamped_.point = FARUtil::Point3DToGeoMsgPoint(robot_pos_);
         goal_pub_->publish(goal_waypoint_stamped_);
+        PubJoyCommandForNav();
       }
     }
     if (!FARUtil::IsDebug) printf("\033[2K");
@@ -819,6 +853,7 @@ void FARMaster::WaypointCallBack(const geometry_msgs::msg::PointStamped& route_g
   FARUtil::Timer.start_time("Overall_executing", true);
   // visualize original goal
   planner_viz_.VizPoint3D(goal_p, "original_goal", VizColor::RED, 1.5);
+  PubJoyCommandForNav();
 }
 
 void FARMaster::GoalPoseCallBack(const geometry_msgs::msg::PoseStamped& route_goal) {
@@ -839,6 +874,7 @@ void FARMaster::GoalPoseCallBack(const geometry_msgs::msg::PoseStamped& route_go
   FARUtil::Timer.start_time("Overall_executing", true);
   // visualize original goal
   planner_viz_.VizPoint3D(goal_p, "original_goal", VizColor::RED, 1.5);
+  PubJoyCommandForNav();
 }
 
 /* allocate static utility PointCloud pointer memory */

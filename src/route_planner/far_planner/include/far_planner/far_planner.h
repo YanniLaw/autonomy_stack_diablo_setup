@@ -67,6 +67,7 @@ private:
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr scan_grid_debug_;
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr new_PCL_pub_;
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr terrain_height_pub_;
+    rclcpp::Publisher<sensor_msgs::msg::Joy>::SharedPtr joy_command_pub_;
 
 
     rclcpp::TimerBase::SharedPtr planning_event_;
@@ -139,6 +140,8 @@ private:
     void PlanningCallBack();
     
     void PrcocessCloud(const sensor_msgs::msg::PointCloud2::SharedPtr pc, const PointCloudPtr& cloudOut);
+
+    void PubJoyCommandForNav();
 
     
     Point3D ExtendViewpointOnObsCloud(const NavNodePtr& nav_node_ptr, const PointCloudPtr& obsCloudIn, float& free_dist);
