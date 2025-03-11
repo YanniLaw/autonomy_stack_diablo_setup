@@ -37,6 +37,7 @@
 #include <glog/logging.h>
 #include "arise_slam_mid360/sensor_data/imu/imu_data.h"
 
+#define USE_NO_PREINTEGRATION_RESULT
 
 namespace arise_slam {
 

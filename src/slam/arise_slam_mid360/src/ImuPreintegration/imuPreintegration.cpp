@@ -638,6 +638,34 @@ namespace arise_slam {
         // RCLCPP_INFO(this->get_logger(), "laserOdometryCB from /aft_mapped_to_init_incremental");
         std::lock_guard<std::mutex> lock(mBuf);
 
+#ifdef USE_NO_PREINTEGRATION_RESULT
+        nav_msgs::msg::Odometry odometry2;
+        odometry2 = *odomMsg;
+        odometry2.header.stamp = odomMsg->header.stamp;
+        odometry2.header.frame_id = WORLD_FRAME;
+        odometry2.child_frame_id = SENSOR_FRAME;
+        pubImuOdometry2->publish(odometry2);
+
+        tf2_ros::TransformBroadcaster br(this);
+        geometry_msgs::msg::TransformStamped transform_stamped_;
+        tf2::Transform transform;
+        transform_stamped_.header.stamp  = odomMsg->header.stamp;
+        transform_stamped_.header.frame_id = WORLD_FRAME;
+        transform_stamped_.child_frame_id = SENSOR_FRAME;
+
+        tf2::Quaternion q;
+        transform.setOrigin(tf2::Vector3(odometry2.pose.pose.position.x, 
+        odometry2.pose.pose.position.y, odometry2.pose.pose.position.z));
+
+        q.setW(odometry2.pose.pose.orientation.w);
+        q.setX(odometry2.pose.pose.orientation.x);
+        q.setY(odometry2.pose.pose.orientation.y);
+        q.setZ(odometry2.pose.pose.orientation.z);
+        transform.setRotation(q);
+        transform_stamped_.transform = tf2::toMsg(transform);
+        br.sendTransform(transform_stamped_);
+        return;
+#endif
 
         cur_frame = odomMsg;
         double lidarOdomTime = secs(odomMsg);
@@ -841,7 +869,9 @@ namespace arise_slam {
 
     void imuPreintegration::imuHandler(const sensor_msgs::msg::Imu::SharedPtr imu_raw) 
     {
-     
+#ifdef USE_NO_PREINTEGRATION_RESULT
+        return;
+#endif     
         std::lock_guard<std::mutex> lock(mBuf);
         
         sensor_msgs::msg::Imu thisImu = imuConverter(*imu_raw);
