@@ -32,6 +32,7 @@ far_planner:
     util/accept_max_align_angle: 4.0   # Unit: degree
     util/obs_inflate_size: 1
     util/new_intensity_thred: 2.0
+    # util/nav_clear_dist: 0.3 # default 0.5
     util/terrain_free_Z: 0.15
     util/dyosb_update_thred: 4
     util/new_point_counter: 5
@@ -46,9 +47,9 @@ far_planner:
 
     # Corner Detector Params
     c_detector/resize_ratio: 3.0
-    c_detector/filter_count_value: 6
+    c_detector/filter_count_value: 7
     c_detector/is_save_img: false
-    c_detector/img_folder_path: /path
+    c_detector/img_folder_path: /home/temi/test_files
 
     # Graph Planner Params
     g_planner/converge_distance: 0.4  # Unit: meter

@@ -41,7 +41,7 @@ void FARMaster::Init() {
   traverse_time_pub_  = nh_->create_publisher<std_msgs::msg::Float32>("/far_traverse_time", 5);
 
   // planning status publisher
-  reach_goal_pub_     = nh_->create_publisher<std_msgs::msg::Bool>("/far_reach_goal_status", 5);
+  reach_goal_pub_     = nh_->create_publisher<std_msgs::msg::Int8>("/far_reach_goal_status", 5);
 
   // Terminal formatting subscriber
   read_command_sub_   = nh_->create_subscription<std_msgs::msg::String>("/read_file_dir", 1, std::bind(&FARMaster::ReadFileCommand, this, std::placeholders::_1));
@@ -199,6 +199,7 @@ void FARMaster::ResetEnvironmentAndGraph() {
 }
 
 void FARMaster::MainLoopCallBack() {
+  // RCLCPP_INFO(nh_->get_logger(), "MainLoopCallBack: %ld", std::this_thread::get_id());
   if (!is_init_completed_) {
     return;
   }
@@ -208,6 +209,19 @@ void FARMaster::MainLoopCallBack() {
       if (FARUtil::IsDebug) RCLCPP_WARN(nh_->get_logger(), "****************** Graph and Env Reset ******************");
       return;
   }
+
+  if (reset_and_keep_goal_) {
+    // this is not ok now !
+    this->ResetEnvironmentAndGraph();
+    std::cout << "original_goal_position: " << original_goal_position_ << std::endl;
+    graph_planner_.UpdateGoal(original_goal_position_);
+    // FARUtil::Timer.start_time("Overall_executing", true);
+    // visualize original goal
+    planner_viz_.VizPoint3D(original_goal_position_, "original_goal", VizColor::RED, 1.5);
+    reset_and_keep_goal_ = false;
+    if (FARUtil::IsDebug) RCLCPP_WARN(nh_->get_logger(), "****************** Reset And keep goal ******************");
+    return;
+}
 
   if (!this->PreconditionCheck()) {
       return;
@@ -314,6 +328,7 @@ void FARMaster::PlanningCallBack() {
     if (!FARUtil::IsDebug) printf("\033[2K");
     // std::cout<<"    "<<"Path Search "<<"Time: "<<0.f<<"ms"<<std::endl;
   } else { 
+    original_goal_position_ = goal_ptr->position;
     // Update goal postion with nearby terrain cloud
     const Point3D ori_p = graph_planner_.GetOriginNodePos(true);
     PointCloudPtr goal_obs(new pcl::PointCloud<PCLPoint>());
@@ -350,6 +365,11 @@ void FARMaster::PlanningCallBack() {
         planner_viz_.VizViewpointExtend(goal_ptr, goal_ptr->position);
       }
       goal_waypoint_stamped_.point = FARUtil::Point3DToGeoMsgPoint(waypoint);
+      if (is_reach_goal) {
+        is_reset_env_ = true;
+        RCLCPP_WARN(nh_->get_logger(), "Reached goal, reset env.");
+        goal_waypoint_stamped_.point = FARUtil::Point3DToGeoMsgPoint(robot_pos_);
+      }
       goal_pub_->publish(goal_waypoint_stamped_);
       PubJoyCommandForNav();
       is_planner_running_ = true;
@@ -362,16 +382,23 @@ void FARMaster::PlanningCallBack() {
       is_planner_running_ = false;
       nav_heading_ = Point3D(0,0,0);
       if (is_planning_fails) { // stops the robot
+        is_reset_env_ = true;
+        RCLCPP_WARN(nh_->get_logger(), "Planning running but fails, reset env and graph.");
         goal_waypoint_stamped_.point = FARUtil::Point3DToGeoMsgPoint(robot_pos_);
         goal_pub_->publish(goal_waypoint_stamped_);
         PubJoyCommandForNav();
       }
     }
+    if (is_planning_fails && !is_reset_env_) {
+      is_reset_env_ = true;
+      RCLCPP_WARN(nh_->get_logger(), "Planning fails but not reset env, reset env and graph.");  
+    }
     if (!FARUtil::IsDebug) printf("\033[2K");
 
     // publish planner status and timers
-    auto reach_goal_msg = std_msgs::msg::Bool();
-    reach_goal_msg.data = is_reach_goal;
+    auto reach_goal_msg = std_msgs::msg::Int8();
+    int reach_goal_status = is_reach_goal ? 1 : is_planning_fails ? -1 : 0; 
+    reach_goal_msg.data = reach_goal_status;
     reach_goal_pub_->publish(reach_goal_msg);
     auto traverse_timer = std_msgs::msg::Float32();
     traverse_timer.data = FARUtil::Timer.record_time("Overall_executing");
@@ -849,6 +876,23 @@ void FARMaster::WaypointCallBack(const geometry_msgs::msg::PointStamped& route_g
     if (FARUtil::IsDebug) RCLCPP_WARN_ONCE(nh_->get_logger(), "FARMaster: waypoint published is not on world frame!");
     FARUtil::TransformPoint3DFrame(goal_frame, master_params_.world_frame, tf_buffer_, goal_p); 
   }
+
+  // rest env first // need multi thread
+  // is_reset_env_ = true;
+  // int count = 0;
+  // while (true) {
+  //   if (!is_reset_env_) {
+  //     RCLCPP_INFO(nh_->get_logger(), "Reset env finished, set goal point.");
+  //     break;
+  //   }
+  //   if (count > 30) {
+  //     RCLCPP_INFO(nh_->get_logger(), "Wait env reset timeout, set goal point directly.");
+  //     break;      
+  //   }
+  //   count++;
+  //   std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  // }
+  
   graph_planner_.UpdateGoal(goal_p);
   FARUtil::Timer.start_time("Overall_executing", true);
   // visualize original goal
@@ -870,6 +914,23 @@ void FARMaster::GoalPoseCallBack(const geometry_msgs::msg::PoseStamped& route_go
     if (FARUtil::IsDebug) RCLCPP_WARN_ONCE(nh_->get_logger(), "FARMaster: waypoint published is not on world frame!");
     FARUtil::TransformPoint3DFrame(goal_frame, master_params_.world_frame, tf_buffer_, goal_p); 
   }
+
+  // rest env first // need multi thread
+  // is_reset_env_ = true;
+  // int count = 0;
+  // while (true) {
+  //   if (!is_reset_env_) {
+  //     RCLCPP_INFO(nh_->get_logger(), "Reset env finished, set goal point.");
+  //     break;
+  //   }
+  //   if (count > 30) {
+  //     RCLCPP_INFO(nh_->get_logger(), "Wait env reset timeout, set goal point directly.");
+  //     break;      
+  //   }
+  //   count++;
+  //   std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  // }
+
   graph_planner_.UpdateGoal(goal_p);
   FARUtil::Timer.start_time("Overall_executing", true);
   // visualize original goal
@@ -965,6 +1026,9 @@ int main(int argc, char** argv){
   auto far_planner_node = std::make_shared<FARMaster>();
   far_planner_node->Init();
   rclcpp::spin(far_planner_node->GetNodeHandle());
+  // rclcpp::executors::MultiThreadedExecutor executor;
+  // executor.add_node(far_planner_node->GetNodeHandle());
+  // executor.spin();
 
   rclcpp::shutdown();
 

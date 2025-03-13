@@ -6,6 +6,8 @@
 #include <string>
 #include <time.h>
 #include <queue>
+#include <thread>
+#include <chrono>
 #include <algorithm>
 #include <unordered_set>
 #include <boost/functional/hash.hpp>
@@ -25,6 +27,7 @@
 #include <nav_msgs/msg/odometry.hpp>
 #include <std_msgs/msg/empty.hpp>
 #include <std_msgs/msg/bool.hpp>
+#include <std_msgs/msg/int8.hpp>
 #include <std_msgs/msg/string.hpp>
 #include <std_msgs/msg/float32.hpp>
 #include <nav_msgs/msg/path.hpp>

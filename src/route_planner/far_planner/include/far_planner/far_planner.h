@@ -60,7 +60,7 @@ private:
     rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr runtime_pub_;
     rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr planning_time_pub_;
     rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr traverse_time_pub_;
-    rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr reach_goal_pub_;
+    rclcpp::Publisher<std_msgs::msg::Int8>::SharedPtr reach_goal_pub_;
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr dynamic_obs_pub_;
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr surround_free_debug_;
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr surround_obs_debug_;
@@ -76,8 +76,10 @@ private:
     std_msgs::msg::Float32 runtimer_, plan_timer_;
 
     Point3D robot_pos_, robot_heading_, nav_heading_;
+    Point3D original_goal_position_;
 
     bool is_reset_env_, is_stop_update_, is_init_completed_;
+    bool reset_and_keep_goal_ = false;
 
     geometry_msgs::msg::PointStamped goal_waypoint_stamped_;
 

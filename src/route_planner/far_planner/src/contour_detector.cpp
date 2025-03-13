@@ -65,7 +65,8 @@ void ContourDetector::ResizeAndBlurImg(const cv::Mat& img, cv::Mat& Rimg) {
     cv::resize(Rimg, Rimg, cv::Size(), cd_params_.kRatio, cd_params_.kRatio, 
                cv::InterpolationFlags::INTER_LINEAR);
     //cv::morphologyEx(Rimg, Rimg, cv::MORPH_OPEN, getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
-    cv::boxFilter(Rimg, Rimg, -1, cv::Size(cd_params_.kBlurSize, cd_params_.kBlurSize), cv::Point2i(-1, -1), false);
+    cv::boxFilter(Rimg, Rimg, -1, cv::Size(3, 3), cv::Point2i(-1, -1), false);
+    // cv::boxFilter(Rimg, Rimg, -1, cv::Size(cd_params_.kBlurSize, cd_params_.kBlurSize), cv::Point2i(-1, -1), false);
     //cv::morphologyEx(Rimg, Rimg, cv::MORPH_CLOSE, getStructuringElement(cv::MORPH_RECT, cv::Size(cd_params_.kBlurSize+2, cd_params_.kBlurSize+2)));
 }
 

@@ -28,6 +28,7 @@ void GraphPlanner::Init(const rclcpp::Node::SharedPtr nh, const GraphPlannerPara
     Eigen::Vector3d grid_origin(0,0,0);
     Eigen::Vector3d grid_resolution(FARUtil::kLeafSize, FARUtil::kLeafSize, FARUtil::kLeafSize);
     free_terrain_grid_ = std::make_unique<grid_ns::Grid<char>>(grid_size, INIT_BIT, grid_origin, grid_resolution, 3);
+    RCLCPP_INFO(nh_->get_logger(), "GP: planning attemptable param: %d", command_is_free_nav_);
 }
 
 void GraphPlanner::UpdateGraphTraverability(const NavNodePtr& odom_node_ptr, const NavNodePtr& goal_ptr) 

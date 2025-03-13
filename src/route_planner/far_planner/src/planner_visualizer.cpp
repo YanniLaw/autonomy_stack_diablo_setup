@@ -120,8 +120,8 @@ void DPVisualizer::VizGlobalPolygons(const std::vector<PointPair>& contour_pairs
     Marker global_contour_marker, unmatched_contour_marker;
     global_contour_marker.type    = Marker::LINE_LIST;
     unmatched_contour_marker.type = Marker::LINE_LIST;
-    this->SetMarker(nh_, VizColor::ORANGE, "global_contour",    0.2f,  0.5f, global_contour_marker);
-    this->SetMarker(nh_, VizColor::YELLOW, "unmatched_contour", 0.15f, 0.5f, unmatched_contour_marker);
+    this->SetMarker(nh_, VizColor::YELLOW, "global_contour",    0.2f,  0.5f, global_contour_marker);
+    this->SetMarker(nh_, VizColor::GREEN, "unmatched_contour", 0.15f, 0.5f, unmatched_contour_marker);
     for (const auto& p_pair : contour_pairs) {
         geometry_msgs::msg::Point p_start = FARUtil::FARUtil::Point3DToGeoMsgPoint(p_pair.first);
         geometry_msgs::msg::Point p_end   = FARUtil::FARUtil::Point3DToGeoMsgPoint(p_pair.second);
