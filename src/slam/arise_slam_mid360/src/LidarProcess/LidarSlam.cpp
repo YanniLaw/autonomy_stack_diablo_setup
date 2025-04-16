@@ -47,7 +47,7 @@ namespace arise_slam {
             this->PlanarsPoints->push_back(p);
         }
 
-        if (not bInitilization) {
+        if (!bInitilization && local_mode == 0) {
             localMap.setOrigin(T_w_lidar.pos);
 
             this->WorldEdgesPoints->clear();
@@ -90,6 +90,9 @@ namespace arise_slam {
             stats.laser_cloud_surf_stack_num = PlanarsPoints->size();
             stats.iterations.clear();
 
+            // std::cout << "EdgePointsFromMapNum: " << edgePointsFromMapNum << ", planarPointsFromMapNum: " 
+            //           << planarPointsFromMapNum << ", Cur EdgesPoints: " << EdgesPoints->size() 
+            //           << ", Cur PlanarsPoints: " << PlanarsPoints->size() << std::endl;
             TicToc t_opt;
 
             //tbb::concurrent_vector<OptimizationParameter> OptimizationData;
@@ -232,7 +235,7 @@ namespace arise_slam {
                         }
 
                         if (OptimizationData.at(k).feature_type ==
-                            FeatureType::PlaneFeature) {
+                                FeatureType::PlaneFeature /*&& OptimizationData.at(k).match_result == MatchingResult::SUCCESS*/) {
                             Good_Planner_Feature_Num++;
                             ceres::CostFunction *cost_function =
                                     new SurfNormAnalyticCostFunction(
@@ -293,7 +296,7 @@ namespace arise_slam {
                     options.gradient_check_relative_precision = 1e-4;
                     ceres::Solver::Summary summary;
                     ceres::Solve(options, &problem, &summary);
-                    //std::cout << summary.BriefReport()<<"\n";
+                    // std::cout << summary.BriefReport()<<"\n" <<std::endl;
 
                     bool converged = (summary.termination_type == ceres::CONVERGENCE);
 
@@ -329,6 +332,7 @@ namespace arise_slam {
                     iter_stats.rotation_norm =
                             2 * atan2(incremental_T.rot.vec().norm(), incremental_T.rot.w());
 
+                    // std::cout << "IcpIter: "<< icpIter << ", converged: " << converged << ", del_t: " << iter_stats.translation_norm << std::endl;
                     stats.iterations.push_back(iter_stats);
 
    
@@ -433,7 +437,7 @@ namespace arise_slam {
                 WorldPlanarsPoints->push_back(TransformPointd(p, this->T_w_lidar));
             }
 
-            if(acceptResult)
+            if(acceptResult/*&& local_mode == 0*/) // do not change map when local mode
             localMap.addSurfPointCloud(*this->WorldPlanarsPoints);
             kdtree_time_analysis.kd_tree_building_time = t_add_feature.toc();
 

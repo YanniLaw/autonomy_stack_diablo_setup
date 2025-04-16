@@ -485,9 +485,22 @@ namespace arise_slam {
         mBuf.lock();
         if (stop_mapping->data) {
             RCLCPP_INFO(this->get_logger(), "Received stop mapping command!");
+            if (slam.local_mode) {
+                RCLCPP_WARN(this->get_logger(), "Localization mode! exit!!!");
+                return;
+            }
+#if SAVE_ALL_LOCALMAP_AS_MAP
+            RCLCPP_INFO(this->get_logger(), "Save all local map as map.");
+            pcl::PointCloud<PointType> saved_map = slam.localMap.getAllLocalMap();
+            saved_map.width = saved_map.points.size();
+            saved_map.height = 1;
+            RCLCPP_INFO(this->get_logger(), "Map size: %d", saved_map.width);
+#else
             // save map 
             saved_map_->width = saved_map_->points.size();
             saved_map_->height = 1;
+            RCLCPP_INFO(this->get_logger(), "Map size: %d", saved_map_->width);
+#endif
             // check if there exist map file
             std::filesystem::path path_obj(config_.map_dir);
             if (std::filesystem::exists(path_obj)) {
@@ -498,7 +511,11 @@ namespace arise_slam {
                     RCLCPP_WARN_STREAM(this->get_logger(), "Failed to delete map file: " << config_.map_dir);
                 }
             }
+#if SAVE_ALL_LOCALMAP_AS_MAP
+            pcl::io::savePCDFileBinary(slam.map_dir, saved_map);
+#else
             pcl::io::savePCDFileBinary(slam.map_dir, *saved_map_);
+#endif
             RCLCPP_INFO_STREAM(this->get_logger(), "Save map success in " << slam.map_dir);
         }
         mBuf.unlock();
@@ -876,7 +893,7 @@ namespace arise_slam {
             first_frame = true;
             return true;
         }
-        if ((t_w_curr - last_pos).norm() >= 0.1 || 
+        if ((t_w_curr - last_pos).norm() >= 0.05 || 
              std::abs(ShortestAngularDistance(
                 GetYawFromQuaternion(last_quat), GetYawFromQuaternion(q_w_curr))) >= 0.0873) {
             RCLCPP_INFO(this->get_logger(), "canSaveFrame...");
@@ -952,9 +969,9 @@ namespace arise_slam {
         if (!slam.local_mode && canSaveFrame()) {
             pcl::PointCloud<pcl::PointXYZI>::Ptr temp_cloud(new pcl::PointCloud<pcl::PointXYZI>());
             *saved_map_ += *laserCloudFullRes;
-            map_filter_.setInputCloud(saved_map_);
-            map_filter_.filter(*temp_cloud);
-            saved_map_ = temp_cloud;
+            // map_filter_.setInputCloud(saved_map_);
+            // map_filter_.filter(*temp_cloud);
+            // saved_map_ = temp_cloud;
         }
 
         laserCloudFullRes_rot->clear();

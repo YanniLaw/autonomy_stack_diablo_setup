@@ -638,7 +638,7 @@ namespace arise_slam {
         // RCLCPP_INFO(this->get_logger(), "laserOdometryCB from /aft_mapped_to_init_incremental");
         std::lock_guard<std::mutex> lock(mBuf);
 
-#ifdef USE_NO_PREINTEGRATION_RESULT
+#if USE_NO_PREINTEGRATION_RESULT
         nav_msgs::msg::Odometry odometry2;
         odometry2 = *odomMsg;
         odometry2.header.stamp = odomMsg->header.stamp;
@@ -869,7 +869,7 @@ namespace arise_slam {
 
     void imuPreintegration::imuHandler(const sensor_msgs::msg::Imu::SharedPtr imu_raw) 
     {
-#ifdef USE_NO_PREINTEGRATION_RESULT
+#if USE_NO_PREINTEGRATION_RESULT
         return;
 #endif     
         std::lock_guard<std::mutex> lock(mBuf);

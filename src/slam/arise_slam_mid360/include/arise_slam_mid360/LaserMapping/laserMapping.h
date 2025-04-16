@@ -46,6 +46,7 @@
 #include <std_msgs/msg/string.hpp>
 
 
+#define SAVE_ALL_LOCALMAP_AS_MAP 0
 namespace arise_slam {
 
     struct laser_mapping_config{

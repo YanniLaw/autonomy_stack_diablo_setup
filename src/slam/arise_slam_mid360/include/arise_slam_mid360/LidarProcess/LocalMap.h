@@ -159,7 +159,7 @@ public:
         origin_.x() = -centerCubeI;
         origin_.y() = -centerCubeJ;
         origin_.z() = -centerCubeK;
-
+        std::cout << "Local Map Set origon: " << origin_.transpose() << std::endl;
         return origin_;
     }  // function setOrigin end
 
