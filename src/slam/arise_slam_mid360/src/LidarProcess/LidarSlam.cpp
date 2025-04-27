@@ -198,7 +198,6 @@ namespace arise_slam {
                 //                        this->LocalizationICPMaxIter);
                     
                   
-
                     ceres::Problem::Options problem_options;
 
                     ceres::Problem problem(problem_options);
@@ -206,6 +205,9 @@ namespace arise_slam {
                     problem.AddParameterBlock(pose_parameters, 7,
                                               new PoseLocalParameterization());
                     // ceres::LossFunction *loss_function = new ceres::HuberLoss(0.1);
+                    // limit z-axis
+                    problem.SetParameterLowerBound(pose_parameters, 2, -0.01);
+                    problem.SetParameterUpperBound(pose_parameters, 2,  0.01);
 
 #if 0
                     ceres::LossFunction *loss_function = new ceres::HuberLoss(0.1);
