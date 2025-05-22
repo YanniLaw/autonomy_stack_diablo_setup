@@ -24,4 +24,8 @@ src/base_autonomy/vehicle_simulator/mesh/unity/*
 
 src/base_autonomy/vehicle_simulator/log/*
 
+src/slam/fast_lio_ros2/Log/*
+
+src/slam/fast_lio_ros2/PCD/*
+
 !readme.txt
