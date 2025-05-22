@@ -88,7 +88,7 @@ public:
         m_scan_cloud_pub = this->create_publisher<sensor_msgs::msg::PointCloud2>("/registered_scan", 2);
         m_odom_pub = this->create_publisher<nav_msgs::msg::Odometry>("/state_estimation", 10);
         
-        m_timer = this->create_wall_timer(10ms, std::bind(&LocalizerNode::timerCB, this));
+        m_timer = this->create_wall_timer(100ms, std::bind(&LocalizerNode::timerCB, this));
 
         if (m_localizer->loadMap(m_config.map_path)) {
             rclcpp::Time map_time = this->now();
