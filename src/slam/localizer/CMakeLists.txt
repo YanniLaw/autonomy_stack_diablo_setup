@@ -35,11 +35,12 @@ include_directories(
   ${PCL_INCLUDE_DIRS}
 )
 
+set(SRC_LIST 
+  src/localizer_node.cpp
+  src/localizers/commons.cpp
+  src/localizers/icp_localizer.cpp)
 
-set(SRC_LIST src/localizers/commons.cpp
-             src/localizers/icp_localizer.cpp)
-
-add_executable(localizer_node src/localizer_node.cpp ${SRC_LIST})
+add_executable(localizer_node src/main.cpp ${SRC_LIST})
 ament_target_dependencies(localizer_node rclcpp std_msgs sensor_msgs nav_msgs message_filters pcl_conversions tf2_ros geometry_msgs interface)
 target_link_libraries(localizer_node ${PCL_LIBRARIES}  yaml-cpp) 
 
