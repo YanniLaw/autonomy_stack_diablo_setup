@@ -18,6 +18,7 @@
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <geometry_msgs/msg/pose_with_covariance_stamped.hpp>
 
+#include "localizers/tic_toc.h"
 #include "localizers/commons.h"
 #include "localizers/icp_localizer.h"
 #include "interface/srv/relocalize.hpp"

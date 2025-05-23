@@ -96,6 +96,7 @@ void LocalizerNode::loadParameters() {
 
 void LocalizerNode::timerCB() {
   if (!m_state.message_received) return;
+  TicToc timer_tt;
 
   rclcpp::Duration diff = rclcpp::Clock().now() - m_state.last_send_tf_time;
 
@@ -158,13 +159,18 @@ void LocalizerNode::timerCB() {
     // RCLCPP_WARN(this->get_logger(), "Reloc failed!");
   }
   sendBroadCastTF(current_time);
+  auto waste_time = timer_tt.toc();
+  if (waste_time > 100.0) {
+    RCLCPP_INFO(this->get_logger(), "timer waste time: %f ms", waste_time);
+  }
+
   // publishMapCloud(current_time);
 }
 
 void LocalizerNode::syncCB(
     const sensor_msgs::msg::PointCloud2::ConstSharedPtr &cloud_msg, 
     const nav_msgs::msg::Odometry::ConstSharedPtr &odom_msg) {
-
+  // RCLCPP_INFO(this->get_logger(), "syncCB ... %f", this->now().seconds() + this->now().nanoseconds()/1000000);
   std::lock_guard<std::mutex>(m_state.message_mutex);
 
   pcl::fromROSMsg(*cloud_msg, *m_state.last_cloud);
