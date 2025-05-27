@@ -17,6 +17,7 @@ Panels:
   - Class: rviz_common/Tool Properties
     Expanded:
       - /Goalpoint1
+      - /2D Pose Estimate1
     Name: Tool Properties
     Splitter Ratio: 0.5886790156364441
   - Class: rviz_common/Views
@@ -271,10 +272,7 @@ Visualization Manager:
       Enabled: true
       Name: Goalpoint
       Namespaces:
-        clear_nodes: false
-        free_odom_position: false
-        last_nav_node: false
-        out_contour: false
+        {}
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -754,17 +752,9 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        body:
-          Value: true
         camera:
           Value: true
-        camera_init:
-          Value: true
-        map:
-          Value: true
         sensor:
-          Value: true
-        sensor_at_scan:
           Value: true
         vehicle:
           Value: true
@@ -774,16 +764,7 @@ Visualization Manager:
       Show Axes: true
       Show Names: false
       Tree:
-        map:
-          camera_init:
-            body:
-              sensor:
-                camera:
-                  {}
-                vehicle:
-                  {}
-          sensor_at_scan:
-            {}
+        {}
       Update Interval: 0
       Value: true
     - Angle Tolerance: 0.10000000149011612
@@ -840,6 +821,16 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: goalpoint
+    - Class: rviz_default_plugins/SetInitialPose
+      Covariance x: 0.25
+      Covariance y: 0.25
+      Covariance yaw: 0.06853891909122467
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: initialpose
   Transformation:
     Current:
       Class: rviz_default_plugins/TF

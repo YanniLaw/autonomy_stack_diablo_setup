@@ -5,6 +5,14 @@
 #include <pcl/registration/icp.h>
 #include <pcl/filters/voxel_grid.h>
 
+#include <pclomp/voxel_grid_covariance_omp.h>
+#include <pclomp/voxel_grid_covariance_omp_impl.hpp>
+#include <pclomp/gicp_omp.h>
+#include <pclomp/gicp_omp_impl.hpp>
+#include <pclomp/ndt_omp.h>
+#include <pclomp/ndt_omp_impl.hpp>
+
+#define USE_MY_OWN 1
 struct ICPConfig
 {
     double refine_scan_resolution = 0.1;
@@ -36,8 +44,13 @@ public:
 private:
     ICPConfig m_config;
     pcl::VoxelGrid<PointType> m_voxel_filter;
+#if USE_MY_OWN
+    pclomp::GeneralizedIterativeClosestPoint<PointType, PointType>::Ptr m_icp_omp;
+    pclomp::NormalDistributionsTransform<PointType, PointType>::Ptr m_ndt_omp;
+#else
     pcl::IterativeClosestPoint<PointType, PointType> m_refine_icp;
     pcl::IterativeClosestPoint<PointType, PointType> m_rough_icp;
+#endif
     CloudType::Ptr m_refine_inp;
     CloudType::Ptr m_rough_inp;
     CloudType::Ptr m_refine_tgt;

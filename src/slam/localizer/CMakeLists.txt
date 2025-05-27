@@ -27,8 +27,13 @@ find_package(pcl_conversions REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(PCL REQUIRED)
 find_package(yaml-cpp REQUIRED)
+find_package(ndt_omp_ros2 REQUIRED)
+find_package(OpenMP REQUIRED)
 
-
+if (OPENMP_FOUND)
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif()
 
 include_directories(
   ${EIGEN3_INCLUDE_DIR}
@@ -41,7 +46,7 @@ set(SRC_LIST
   src/localizers/icp_localizer.cpp)
 
 add_executable(localizer_node src/main.cpp ${SRC_LIST})
-ament_target_dependencies(localizer_node rclcpp std_msgs sensor_msgs nav_msgs message_filters pcl_conversions tf2_ros geometry_msgs interface)
+ament_target_dependencies(localizer_node rclcpp std_msgs sensor_msgs nav_msgs message_filters pcl_conversions tf2_ros geometry_msgs interface ndt_omp_ros2)
 target_link_libraries(localizer_node ${PCL_LIBRARIES}  yaml-cpp) 
 
 

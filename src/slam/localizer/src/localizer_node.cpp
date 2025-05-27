@@ -161,7 +161,7 @@ void LocalizerNode::timerCB() {
   sendBroadCastTF(current_time);
   auto waste_time = timer_tt.toc();
   if (waste_time > 100.0) {
-    RCLCPP_INFO(this->get_logger(), "timer waste time: %f ms", waste_time);
+    RCLCPP_WARN(this->get_logger(), "timer waste time: %f ms", waste_time);
   }
 
   // publishMapCloud(current_time);
