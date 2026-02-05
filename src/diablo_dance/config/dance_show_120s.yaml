@@ -1,0 +1,219 @@
+# ~120s stage-style choreography (mostly in-place).
+# Tune amplitudes/clamps for your floor + robot. Start conservatively.
+
+rate_hz: 50
+
+steps:
+  # 0) Enter stand + enable height/roll/pitch control
+  - name: enter_stand
+    duration: 2.0
+    mode_mark: true
+    mode:
+      stand_mode: true
+      height_ctrl_mode: true
+      roll_ctrl_mode: true
+      pitch_ctrl_mode: true
+    value:
+      up: 0.74
+
+  # 1) Rise and pose (height keyframes)
+  - name: rise_and_pose
+    duration: 3.0
+    mode_mark: false
+    value:
+      roll: 0.0
+      pitch: 0.0
+    pattern:
+      type: keyframes
+      keyframes:
+        - t: 0.00
+          value: {up: 0.70}
+        - t: 1.50
+          value: {up: 0.76}
+        - t: 3.00
+          value: {up: 0.78}
+
+  # 2) Intro sway (roll + pitch)
+  - name: intro_sway
+    duration: 12.0
+    mode_mark: false
+    value:
+      up: 0.78
+    pattern:
+      type: sine
+      channels:
+        roll:  {amp: 0.20, freq: 0.38, offset: 0.0, phase: 0.00}
+        pitch: {amp: 0.10, freq: 0.76, offset: 0.0, phase: 1.57}
+
+  # 3) Squat bounce (height pulses + gentle roll)
+  - name: squat_bounce
+    duration: 10.0
+    mode_mark: false
+    value:
+      roll: 0.0
+      pitch: 0.0
+    pattern:
+      type: sine
+      channels:
+        up:   {amp: 0.07, freq: 0.90, offset: 0.74, phase: 0.00}
+        roll: {amp: 0.10, freq: 0.45, offset: 0.0, phase: 0.00}
+
+  # 4) Turn groove (small turn + tiny forward)
+  - name: turn_groove
+    duration: 10.0
+    mode_mark: false
+    value:
+      up: 0.74
+    pattern:
+      type: sine
+      channels:
+        left:    {amp: 0.30, freq: 0.28, offset: 0.0, phase: 0.00}
+        forward: {amp: 0.06, freq: 0.56, offset: 0.0, phase: 1.57}
+        roll:    {amp: 0.08, freq: 0.56, offset: 0.0, phase: 0.00}
+
+  # 5) Rock side-to-side (more visible lean)
+  - name: rock_side
+    duration: 12.0
+    mode_mark: false
+    value:
+      up: 0.74
+    pattern:
+      type: sine
+      channels:
+        forward: {amp: 0.10, freq: 0.35, offset: 0.0, phase: 0.00}
+        left:    {amp: 0.18, freq: 0.35, offset: 0.0, phase: 1.57}
+        roll:    {amp: 0.18, freq: 0.70, offset: 0.0, phase: 0.00}
+        pitch:   {amp: 0.08, freq: 0.70, offset: 0.0, phase: 1.57}
+
+  # 6) Split mode ON
+  - name: split_mode_on
+    duration: 1.0
+    mode_mark: true
+    mode:
+      split_mode: true
+
+  # 7) Split wave (leg_split + torso)
+  - name: split_wave
+    duration: 12.0
+    mode_mark: false
+    value:
+      up: 0.74
+      roll: 0.0
+      pitch: 0.0
+    pattern:
+      type: sine
+      channels:
+        leg_split: {amp: 0.55, freq: 0.50, offset: 0.0, phase: 0.00}
+        roll:      {amp: 0.12, freq: 0.50, offset: 0.0, phase: 0.00}
+        pitch:     {amp: 0.08, freq: 1.00, offset: 0.0, phase: 1.57}
+
+  # 8) Split drive fast (higher energy)
+  - name: split_drive_fast
+    duration: 8.0
+    mode_mark: false
+    value:
+      up: 0.74
+    pattern:
+      type: sine
+      channels:
+        leg_split: {amp: 0.60, freq: 0.85, offset: 0.0, phase: 0.00}
+        roll:      {amp: 0.18, freq: 0.85, offset: 0.0, phase: 0.00}
+        pitch:     {amp: 0.10, freq: 1.70, offset: 0.0, phase: 0.00}
+
+  # 9) Split mode OFF
+  - name: split_mode_off
+    duration: 0.5
+    mode_mark: true
+    mode:
+      split_mode: false
+
+  # 10) Micro travel (small figure-eight feel, still mostly in place)
+  - name: micro_travel
+    duration: 12.0
+    mode_mark: false
+    value:
+      up: 0.74
+    pattern:
+      type: sine
+      channels:
+        forward: {amp: 0.12, freq: 0.25, offset: 0.0, phase: 0.00}
+        left:    {amp: 0.25, freq: 0.25, offset: 0.0, phase: 1.57}
+        roll:    {amp: 0.16, freq: 0.50, offset: 0.0, phase: 0.00}
+
+  # 11) Body hits (keyframe accent pattern)
+  - name: body_hits
+    duration: 12.0
+    mode_mark: false
+    value:
+      up: 0.74
+      forward: 0.0
+      left: 0.0
+    pattern:
+      type: keyframes
+      keyframes:
+        - t: 0.00
+          value: {roll: 0.00, pitch: 0.00}
+        - t: 1.00
+          value: {roll: 0.22, pitch: -0.08}
+        - t: 2.00
+          value: {roll: -0.22, pitch: 0.08}
+        - t: 3.00
+          value: {roll: 0.22, pitch: -0.08}
+        - t: 4.00
+          value: {roll: -0.22, pitch: 0.08}
+        - t: 5.00
+          value: {roll: 0.22, pitch: -0.08}
+        - t: 6.00
+          value: {roll: -0.22, pitch: 0.08}
+        - t: 7.00
+          value: {roll: 0.22, pitch: -0.08}
+        - t: 8.00
+          value: {roll: -0.22, pitch: 0.08}
+        - t: 9.00
+          value: {roll: 0.22, pitch: -0.08}
+        - t: 10.00
+          value: {roll: -0.22, pitch: 0.08}
+        - t: 11.00
+          value: {roll: 0.00, pitch: 0.00}
+        - t: 12.00
+          value: {roll: 0.00, pitch: 0.00}
+
+  # 12) Build up
+  - name: build_up
+    duration: 12.0
+    mode_mark: false
+    value:
+      up: 0.74
+    pattern:
+      type: sine
+      channels:
+        roll:  {amp: 0.28, freq: 0.70, offset: 0.0, phase: 0.00}
+        pitch: {amp: 0.14, freq: 1.40, offset: 0.0, phase: 0.00}
+        left:  {amp: 0.25, freq: 0.35, offset: 0.0, phase: 0.00}
+
+  # 13) Finale
+  - name: finale_fast_sway
+    duration: 8.0
+    mode_mark: false
+    value:
+      up: 0.74
+    pattern:
+      type: sine
+      channels:
+        roll:  {amp: 0.32, freq: 0.85, offset: 0.0, phase: 0.00}
+        pitch: {amp: 0.16, freq: 1.70, offset: 0.0, phase: 0.00}
+        left:  {amp: 0.18, freq: 0.42, offset: 0.0, phase: 0.00}
+
+  # 14) Neutral hold (keeps height, zeros everything else)
+  - name: neutral_hold
+    duration: 5.0
+    mode_mark: false
+    value:
+      forward: 0.0
+      left: 0.0
+      up: 0.74
+      roll: 0.0
+      pitch: 0.0
+      leg_split: 0.0
+    pattern:
+      type: hold
