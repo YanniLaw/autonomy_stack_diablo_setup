@@ -10,9 +10,9 @@ steps:
     mode_mark: true
     mode:
       stand_mode: true
-      height_ctrl_mode: true
-      roll_ctrl_mode: true
-      pitch_ctrl_mode: true
+      height_ctrl_mode: false
+      roll_ctrl_mode: false
+      pitch_ctrl_mode: false
     value:
       up: 0.74
 
@@ -27,9 +27,9 @@ steps:
       type: keyframes
       keyframes:
         - t: 0.00
-          value: {up: 0.70}
+          value: {up: 0.50}
         - t: 1.50
-          value: {up: 0.76}
+          value: {up: 0.65}
         - t: 3.00
           value: {up: 0.78}
 

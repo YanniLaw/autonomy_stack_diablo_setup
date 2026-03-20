@@ -14,7 +14,7 @@ def generate_launch_description():
         description="Path to choreography YAML (steps or timeline)."
     )
     auto_start = DeclareLaunchArgument(
-        "auto_start", default_value="true",
+        "auto_start", default_value="false",
         description="Auto-start the choreography on node startup."
     )
 

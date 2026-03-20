@@ -8,9 +8,9 @@ steps:
     mode_mark: true
     mode:
       stand_mode: true
-      height_ctrl_mode: true
-      roll_ctrl_mode: true
-      pitch_ctrl_mode: true
+      height_ctrl_mode: false
+      roll_ctrl_mode: false
+      pitch_ctrl_mode: false
     value:
       up: 0.75
 
@@ -36,26 +36,51 @@ steps:
     pattern:
       type: sine
       channels:
-        up: {amp: 0.10, freq: 0.8, offset: 0.72, phase: 0.0}
+        up: {amp: 0.35, freq: 0.8, offset: 0.72, phase: 0.0}
 
   # 3) rotate-in-place (left) while keeping body stable
   - name: rotate_in_place
-    duration: 6.0
+    duration: 8.0
     mode_mark: false
     value:
-      up: 0.74
+      # up: 0.74
+      forward: 0.0
+      left: 0.8     # 原地持续转向角速度（建议先从 0.15~0.25 试）
+      up: 0.74       # 站立高度基准
+      roll: 0.0
+      pitch: 0.0
     pattern:
       type: sine
       channels:
-        left: {amp: 0.35, freq: 0.25, offset: 0.0, phase: 0.0}
-        roll: {amp: 0.12, freq: 0.5, offset: 0.0, phase: 0.0}
+        # left: {amp: 0.35, freq: 0.25, offset: 0.0, phase: 0.0}
+        # roll: {amp: 0.12, freq: 0.5, offset: 0.0, phase: 0.0}
+        up: {amp: 0.2, freq: 0.9, offset: 0.74, phase: 0.0}
+
 
   # 4) split mode intro + leg split wiggle
   - name: split_mode_on
-    duration: 1.0
+    duration: 5.0
     mode_mark: true
     mode:
       split_mode: true
+
+  # - name: split_mode_on
+  #   duration: 1.0
+  #   mode_mark: true
+  #   mode:
+  #     stand_mode: true
+  #     height_ctrl_mode: false     # 位置模式更直观（可按你实际需要改）
+  #     roll_ctrl_mode: true
+  #     pitch_ctrl_mode: true
+  #     jump_mode: false
+  #     split_mode: true
+  #   value:
+  #     forward: 0.0
+  #     left: 0.0
+  #     up: 0.74
+  #     roll: 0.0
+  #     pitch: 0.0
+  #     leg_split: 0.0
 
   - name: split_wiggle
     duration: 8.0

@@ -534,10 +534,14 @@ class DiabloDanceOrchestrator(Node):
 
         if t_step >= max(step.duration, 0.0):
             # next step
+            prev_step_name = step.name
             self._step_idx += 1
             self._step_t0 = now
             if self._step_idx >= len(self._steps):
                 self._stop()
+            else:
+                next_step_name = self._steps[self._step_idx].name
+                self.get_logger().info(f"Step switch: {prev_step_name} -> {next_step_name}")
 
 def main(args=None) -> None:
     rclpy.init(args=args)
