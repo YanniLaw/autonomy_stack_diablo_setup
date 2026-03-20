@@ -7,7 +7,7 @@
 #include "diablo_body_state.hpp"
 #include "motion_msgs/msg/motion_ctrl.hpp"
 #include "diablo_utils/diablo_tools/osdk_vehicle.hpp"
-#include "std_msgs/msg/int8.hpp"
+#include "std_msgs/msg/bool.hpp"
 
 #define CMD_GO_FORWARD                               0x08
 #define CMD_GO_LEFT                                  0x04
@@ -32,7 +32,7 @@ public:
     diabloCtrlNode(std::string name) : Node(name)
     {
         RCLCPP_INFO(this->get_logger(), "Sub node: %s.",name.c_str());
-        pub_robot_state = this->create_publisher<std_msgs::msg::Int8>("diablo/robot_state", 10);
+        pub_robot_state = this->create_publisher<std_msgs::msg::Bool>("diablo/robot_state", 10);
         sub_movement_cmd = this->create_subscription<motion_msgs::msg::MotionCtrl>("diablo/MotionCmd", 10, std::bind(&diabloCtrlNode::Motion_callback, this, std::placeholders::_1));
         ctrl_msg_.value.up = 1.0;
     }
@@ -43,7 +43,7 @@ public:
     std::shared_ptr<std::thread> thread_;
     DIABLO::OSDK::Movement_Ctrl* pMovementCtrl;
     DIABLO::OSDK::Telemetry* pTelemetry;
-    void PublishRobotState(const std_msgs::msg::Int8& msg) {
+    void PublishRobotState(const std_msgs::msg::Bool& msg) {
         pub_robot_state->publish(msg);
     }
 
@@ -55,7 +55,7 @@ private:
 
 private:
     rclcpp::Subscription<motion_msgs::msg::MotionCtrl>::SharedPtr sub_movement_cmd;
-    rclcpp::Publisher<std_msgs::msg::Int8>::SharedPtr pub_robot_state;
+    rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr pub_robot_state;
     OSDK_Movement_Ctrl_t    cmd_value;
     bool                onSend = true;
     bool        thd_loop_mark_ = true;

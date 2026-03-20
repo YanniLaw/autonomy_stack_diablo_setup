@@ -208,7 +208,7 @@ class DiabloDanceOrchestrator(Node):
         self._rate_hz = float(self.get_parameter("rate_hz").value)
 
         self._pub = self.create_publisher(MotionCtrl, self._cmd_topic, 10)
-        self._pub_state = self.create_publisher(Int8, "dance/state", 10)# for web server
+        self._pub_state = self.create_publisher(Bool, "dance/state", 10)# for web server
 
         # services
         self._srv_start = self.create_service(Trigger, "dance/start", self._on_start)
@@ -497,8 +497,8 @@ class DiabloDanceOrchestrator(Node):
             "pitch": float(msg.value.pitch),
             "leg_split": float(msg.value.leg_split),
         }
-        state_msg = Int8()
-        state_msg.data = 1
+        state_msg = Bool()
+        state_msg.data = True
         self._pub_state.publish(state_msg)# for web server
         self._pub.publish(msg)
 
@@ -506,8 +506,8 @@ class DiabloDanceOrchestrator(Node):
 
     def _on_tick(self) -> None:
         if not self._playing or self._paused:
-            state_msg = Int8()
-            state_msg.data = 0
+            state_msg = Bool()
+            state_msg.data = False
             self._pub_state.publish(state_msg)# for web server
             return
         if self._t0 is None:
