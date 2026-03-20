@@ -51,6 +51,7 @@ from rclpy.time import Time
 from rclpy.parameter import Parameter
 
 from std_srvs.srv import Trigger, SetBool
+from std_msgs.msg import Int8, Bool
 
 try:
     import yaml  # type: ignore
@@ -207,6 +208,7 @@ class DiabloDanceOrchestrator(Node):
         self._rate_hz = float(self.get_parameter("rate_hz").value)
 
         self._pub = self.create_publisher(MotionCtrl, self._cmd_topic, 10)
+        self._pub_state = self.create_publisher(Int8, "dance/state", 10)# for web server
 
         # services
         self._srv_start = self.create_service(Trigger, "dance/start", self._on_start)
@@ -254,6 +256,8 @@ class DiabloDanceOrchestrator(Node):
                 self._start()
             else:
                 self.get_logger().warn("auto_start is true, but no choreography loaded.")
+        else:
+            self.get_logger().info("Choreography loaded. Call service dance/start to begin playback.")
 
     # --------------------------- YAML ---------------------------
 
@@ -389,18 +393,21 @@ class DiabloDanceOrchestrator(Node):
         ok, msg = self._start()
         resp.success = ok
         resp.message = msg
+        self.get_logger().info("Choreography started via service call.")
         return resp
 
     def _on_stop(self, req: Trigger.Request, resp: Trigger.Response) -> Trigger.Response:
         ok, msg = self._stop()
         resp.success = ok
         resp.message = msg
+        self.get_logger().info("Choreography stopped via service call.")
         return resp
 
     def _on_pause(self, req: SetBool.Request, resp: SetBool.Response) -> SetBool.Response:
         self._paused = bool(req.data)
         resp.success = True
         resp.message = "paused" if self._paused else "resumed"
+        self.get_logger().info(f"Choreography {resp.message}.")
         return resp
 
     def _on_reload(self, req: Trigger.Request, resp: Trigger.Response) -> Trigger.Response:
@@ -411,6 +418,7 @@ class DiabloDanceOrchestrator(Node):
 
     def _start(self) -> Tuple[bool, str]:
         if not (self._steps or self._timeline):
+            self.get_logger().warn("No choreography loaded. Cannot start.")
             return False, "No choreography loaded."
         self._playing = True
         self._paused = False
@@ -419,6 +427,7 @@ class DiabloDanceOrchestrator(Node):
         self._step_t0 = now
         self._step_idx = 0
         self._timeline_cursor = 0
+        self.get_logger().info("Choreography started.")
         return True, "started"
 
     def _stop(self) -> Tuple[bool, str]:
@@ -439,6 +448,7 @@ class DiabloDanceOrchestrator(Node):
         safe["pitch"] = 0.0
         safe["leg_split"] = 0.0
         self._publish_cmd(mode_mark=False, mode={}, value=safe)
+        self.get_logger().info("Choreography stopped.")
         return True, "stopped"
 
     # --------------------------- publish ---------------------------
@@ -487,13 +497,18 @@ class DiabloDanceOrchestrator(Node):
             "pitch": float(msg.value.pitch),
             "leg_split": float(msg.value.leg_split),
         }
-
+        state_msg = Int8()
+        state_msg.data = 1
+        self._pub_state.publish(state_msg)# for web server
         self._pub.publish(msg)
 
     # --------------------------- main tick ---------------------------
 
     def _on_tick(self) -> None:
         if not self._playing or self._paused:
+            state_msg = Int8()
+            state_msg.data = 0
+            self._pub_state.publish(state_msg)# for web server
             return
         if self._t0 is None:
             self._t0 = self.get_clock().now()

@@ -123,6 +123,9 @@ int main(int argc, char **argv)
     node->pMovementCtrl = vehicle.movement_ctrl;
     node->pTelemetry = vehicle.telemetry;
     //node->run_();
+    std_msgs::msg::Int8 robot_state_msg;
+    robot_state_msg.data = 0;
+    node->PublishRobotState(robot_state_msg);
 
     int heart_beat_count = 0;
     rclcpp::Rate rate(100);
@@ -133,6 +136,8 @@ int main(int argc, char **argv)
       heart_beat_count++;
       if (heart_beat_count > 100) {
         node->heart_beat_loop();
+        robot_state_msg.data = 1;
+        node->PublishRobotState(robot_state_msg);
         heart_beat_count = 0;
       }
 

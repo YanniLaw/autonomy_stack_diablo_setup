@@ -11,6 +11,7 @@
 
   <depend>rclcpp</depend>
   <depend>motion_msgs</depend>
+  <depend>std_msgs</depend>
   <depend>diablo_utils</depend>
   <depend>diablo_body</depend>
 

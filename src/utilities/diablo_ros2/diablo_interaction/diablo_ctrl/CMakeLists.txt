@@ -22,6 +22,7 @@ find_package(diablo_body REQUIRED)
 find_package(ament_cmake REQUIRED)
 find_package(motion_msgs REQUIRED)
 find_package(diablo_utils REQUIRED)
+find_package(std_msgs REQUIRED)
 
 
 include_directories(
@@ -33,6 +34,7 @@ set(dependencies
   diablo_body
   motion_msgs
   diablo_utils
+  std_msgs
 )
 
 set(executable_name diablo_ctrl_node)
