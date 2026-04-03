@@ -1,0 +1,25 @@
+[Unit]
+Description=Diablo Autostart Service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=temi
+RuntimeDirectory=diablo_boot
+Environment="ROS_LOG_DIR=%t/diablo_boot"
+Environment=RCUTILS_LOGGING_BUFFERED_STREAM=0
+Environment=RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+Environment=ROS_DOMAIN_ID=5
+ExecStart=/home/temi/autonomy_stack_diablo_setup/setup/diablo_launch.sh
+
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+TimeoutStopSec=10s
+KillMode=mixed
+
+
+[Install]
+WantedBy=multi-user.target
