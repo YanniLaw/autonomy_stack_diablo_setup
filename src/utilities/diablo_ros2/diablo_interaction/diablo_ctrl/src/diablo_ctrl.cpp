@@ -46,12 +46,49 @@ void diabloCtrlNode::run_(void){
     this->thread_ = std::make_shared<std::thread>(&diabloCtrlNode::heart_beat_loop,this);
 }
 
+void diabloCtrlNode::EStop_callback(const std_msgs::msg::Bool::SharedPtr msg){
+    estop_active_ = msg->data;
+    if(estop_active_){
+        ctrl_msg_.mode_mark = false;
+        ctrl_msg_.value.forward = 0.0;
+        ctrl_msg_.value.left = 0.0;
+        // ctrl_msg_.value.roll = 0.0;
+        // ctrl_msg_.value.pitch = 0.0;
+        // ctrl_msg_.value.leg_split = 0.0;
+        // ctrl_msg_.value.up = pMovementCtrl->ctrl_data.up;
+        onSend = true;
+
+        if(pMovementCtrl->in_control())
+        {
+            pMovementCtrl->ctrl_data.forward = 0.0;
+            pMovementCtrl->ctrl_data.left = 0.0;
+            // pMovementCtrl->ctrl_data.roll = 0.0;
+            // pMovementCtrl->ctrl_data.pitch = 0.0;
+            // pMovementCtrl->ctrl_data.leg_split = 0.0;
+            pMovementCtrl->SendMovementCtrlCmd();
+        }
+
+        RCLCPP_INFO(this->get_logger(), "E-Stop is activated.");
+    } else {
+        onSend = true;
+        RCLCPP_INFO(this->get_logger(), "E-Stop is released.");
+    }
+}
+
 void diabloCtrlNode::Motion_callback(const motion_msgs::msg::MotionCtrl::SharedPtr msg)
 {
+    if(estop_active_)
+    {
+        RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 1000, "Ignoring motion command while E-Stop is active.");
+        return;
+    }
+
     onSend = false;
     if(!pMovementCtrl->in_control())
     {
+        RCLCPP_INFO(this->get_logger(), "Not in control, try to obtain control.");
         pMovementCtrl->obtain_control();
+        onSend = true;
         return;
     }
     ctrl_msg_.mode = msg->mode;

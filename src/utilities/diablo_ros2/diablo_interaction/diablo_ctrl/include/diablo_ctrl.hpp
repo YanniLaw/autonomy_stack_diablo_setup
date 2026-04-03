@@ -33,6 +33,7 @@ public:
     {
         RCLCPP_INFO(this->get_logger(), "Sub node: %s.",name.c_str());
         pub_robot_state = this->create_publisher<std_msgs::msg::Bool>("diablo/robot_state", 10);
+        sub_estop = this->create_subscription<std_msgs::msg::Bool>("/estop", 10, std::bind(&diabloCtrlNode::EStop_callback, this, std::placeholders::_1));
         sub_movement_cmd = this->create_subscription<motion_msgs::msg::MotionCtrl>("diablo/MotionCmd", 10, std::bind(&diabloCtrlNode::Motion_callback, this, std::placeholders::_1));
         ctrl_msg_.value.up = 1.0;
     }
@@ -52,12 +53,15 @@ public:
 
 private:
     void Motion_callback(const motion_msgs::msg::MotionCtrl::SharedPtr msg);
+    void EStop_callback(const std_msgs::msg::Bool::SharedPtr msg);
 
 private:
+    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr sub_estop;
     rclcpp::Subscription<motion_msgs::msg::MotionCtrl>::SharedPtr sub_movement_cmd;
     rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr pub_robot_state;
     OSDK_Movement_Ctrl_t    cmd_value;
     bool                onSend = true;
+    bool                estop_active_ = false;
     bool        thd_loop_mark_ = true;
     motion_msgs::msg::MotionCtrl                                       ctrl_msg_;
 };
