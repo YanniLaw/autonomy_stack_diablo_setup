@@ -16,7 +16,7 @@ steps:
 
   # 1) warm up sway (roll) + head nod (pitch)
   - name: sway_1
-    duration: 10.0
+    duration: 12.0
     mode_mark: false
     value:
       up: 0.75
@@ -28,7 +28,7 @@ steps:
 
   # 2) squat pulses (height)
   - name: squat_pulse
-    duration: 8.0
+    duration: 10.0
     mode_mark: false
     value:
       roll: 0.0
@@ -40,7 +40,7 @@ steps:
 
   # 3) rotate-in-place (left) while keeping body stable
   - name: rotate_in_place
-    duration: 8.0
+    duration: 15.0
     mode_mark: false
     value:
       # up: 0.74
@@ -83,7 +83,7 @@ steps:
   #     leg_split: 0.0
 
   - name: split_wiggle
-    duration: 8.0
+    duration: 1.0
     mode_mark: false
     value:
       up: 0.72
@@ -94,6 +94,43 @@ steps:
       channels:
         leg_split: {amp: 0.55, freq: 0.55, offset: 0.0, phase: 0.0}
 
+  - name: body_hits
+    duration: 12.0
+    mode_mark: false
+    value:
+      up: 0.74
+      forward: 0.0
+      left: 0.0
+    pattern:
+      type: keyframes
+      keyframes:
+        - t: 0.00
+          value: {roll: 0.00, pitch: 0.00}
+        - t: 1.00
+          value: {roll: 0.22, pitch: -0.08}
+        - t: 2.00
+          value: {roll: -0.22, pitch: 0.08}
+        - t: 3.00
+          value: {roll: 0.22, pitch: -0.08}
+        - t: 4.00
+          value: {roll: -0.22, pitch: 0.08}
+        - t: 5.00
+          value: {roll: 0.22, pitch: -0.08}
+        - t: 6.00
+          value: {roll: -0.22, pitch: 0.08}
+        - t: 7.00
+          value: {roll: 0.22, pitch: -0.08}
+        - t: 8.00
+          value: {roll: -0.22, pitch: 0.08}
+        - t: 9.00
+          value: {roll: 0.22, pitch: -0.08}
+        - t: 10.00
+          value: {roll: -0.22, pitch: 0.08}
+        - t: 11.00
+          value: {roll: 0.00, pitch: 0.00}
+        - t: 12.00
+          value: {roll: 0.00, pitch: 0.00}
+
   - name: split_mode_off
     duration: 0.5
     mode_mark: true
@@ -102,7 +139,7 @@ steps:
 
   # 5) forward/back "groove" (very small)
   - name: groove_fb
-    duration: 10.0
+    duration: 15.0
     mode_mark: false
     value:
       up: 0.74
@@ -114,7 +151,7 @@ steps:
 
   # 6) finale: quick sway + stop
   - name: finale
-    duration: 10.0
+    duration: 15.0
     mode_mark: false
     value:
       up: 0.74

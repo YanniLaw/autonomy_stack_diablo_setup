@@ -22,7 +22,7 @@ def generate_launch_description():
         package="diablo_dance",
         executable="diablo_dance_orchestrator",
         name="diablo_dance_orchestrator",
-        output="screen",
+        output="log",
         parameters=[{
             "choreo_yaml": LaunchConfiguration("choreo_yaml"),
             "auto_start": LaunchConfiguration("auto_start"),
